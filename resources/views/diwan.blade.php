@@ -47,13 +47,13 @@
                             <label class="block text-sm font-semibold text-gray-700">طبيعة القرار</label>
                             <div class="flex gap-4 mt-2">
                                 <label class="flex items-center gap-2 cursor-pointer">
-                                    <input checked type="radio" name="group" v-model="urgencyType" class="w-4 h-4 text-[#1a4d4d]" value="normal"> <span class="text-sm">عادي</span>
+                                    <input checked type="radio"  v-model="form.urgencyType" class="w-4 h-4 text-[#1a4d4d]" value="normal"> <span class="text-sm">عادي</span>
                                 </label>
                                 <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="radio" name="group" v-model="urgencyType" class="w-4 h-4 text-[#1a4d4d]"  value="urgent"> <span class="text-sm">مستعجل</span>
+                                    <input type="radio"  v-model="form.urgencyType" class="w-4 h-4 text-[#1a4d4d]"  value="urgent"> <span class="text-sm">مستعجل</span>
                                 </label>
                                 <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="radio" name="group" v-model="urgencyType" class="w-4 h-4 text-[#1a4d4d]" value="other"> <span class="text-sm">متفرق</span>
+                                    <input type="radio"  v-model="form.urgencyType" class="w-4 h-4 text-[#1a4d4d]" value="other"> <span class="text-sm">متفرق</span>
                                 </label>
                             </div>
                         </div>
@@ -230,7 +230,6 @@
             const app = Vue.createApp({
                 data() {
                     return {
-                        urgencyType: 'normal', // الحالة الافتراضية
                         courts: [],
                         loading: true,
                         loadingDecisions: true,
@@ -244,6 +243,9 @@
                             number: '',
                             round_year: '2026',
                             c_date: '',
+                            urgencyType:'normal',
+                            hurry_text:null,
+                            hurry_date:null
                         },
                         errors: {}
                     }
@@ -283,6 +285,8 @@
                         this.loadingDecisions = true;
                         try {
                             const response = await axios.get('/diwan/active-decisions');
+                            console.log(response.data);
+
                             this.decisionsForCopy =  response.data.decisionsForCopy;
                             this.decisionsForCopy =this.decisionsForCopy.sort( (a, b) => { return a.descionD.decision_number - b.descionD.decision_number;  });
                             this.loadingDecisions = false;
@@ -299,6 +303,7 @@
                     async bringActiveDecisions() {
                         try {
                             const response = await axios.get('/diwan/active-decisions');
+                            
                             this.decisionsForCopy =  response.data.decisionsForCopy;
                             this.decisionsForCopy =this.decisionsForCopy.sort( (a, b) => { return a.descionD.decision_number - b.descionD.decision_number; });
                             this.loadingDecisions = false;
@@ -333,7 +338,7 @@
                     
                     channel.bind('NewDecisionEvent', (data) => {
                         console.log('وصلت البيانات أخيراً:', data);
-                        alert('وصل قرار جديد: ' + JSON.stringify(data));
+                        // alert('وصل قرار جديد: ' + JSON.stringify(data));
                         this.bringActiveDecisions();
                     });
                 }

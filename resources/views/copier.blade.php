@@ -1,5 +1,38 @@
 @extends('main')
 
+
+@section('head_content')
+    <style>
+       @media print {
+        /* إخفاء كل شيء ما عدا قسم الطباعة */
+        body * {
+            visibility: hidden;
+        }
+        #print-section, #print-section * {
+            visibility: visible;
+        }
+        #print-section {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            padding: 1.5cm;
+        }
+        /* منع تقطيع الورقة في منتصف الفقرة */
+        p, .mb-4 {
+            page-break-inside: avoid;
+        }
+        }
+
+        /* إخفاء قسم الطباعة في العرض العادي داخل المتصفح */
+        #print-section {
+            display: 'block';
+        }
+
+    </style>
+@endsection
+
+
 @section('content')
 
 <div id="decision-editor" v-cloak class="min-h-screen bg-gray-100 p-4 rtl" dir="rtl">
@@ -10,7 +43,7 @@
                 <button @click="saveDecision" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg font-bold transition flex items-center gap-2">
                     <i class="fas fa-save"></i> حفظ القرار (F10)
                 </button>
-                <button class="bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg transition">
+                <button @click="printDecision" class="bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg transition">
                     <i class="fas fa-print"></i> معاينة وطباعة
                 </button>
             </div>
@@ -350,6 +383,7 @@
                     </div>
                 </div>
             </div>
+            @include('print_decision')
 
         </div>
     </div>
@@ -590,7 +624,16 @@
                     saveDraft() {
                         // هنا نستخدم Axios لإرسال البيانات إلى Redis أو Database
                         console.log("Saving data:", this.form);
-                        alert("تم حفظ بيانات القرار بنجاح");
+                        alert("تم حفظ مسودة القرار بنجاح");
+                    },
+                    printDecision() {
+                        // ترتيب التبويبات حسب 'order' قبل الطباعة
+                        this.selectedTabs.sort((a, b) => a.order - b.order);
+                        
+                        // تشغيل أمر طباعة المتصفح
+                        setTimeout(() => {
+                            window.print();
+                        }, 500);
                     },
                     setCFDecRes(cfd){
                         this.dec.decision_number = cfd.descionD.decision_number;

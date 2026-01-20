@@ -1,4 +1,48 @@
 @extends('main')
+
+@section('head_content')
+    <style>
+        @media print {
+            body * { visibility: hidden; } /* إخفاء كل شيء في الموقع */
+            #print-area, #print-area * { visibility: visible; } /* إظهار منطقة الطباعة فقط */
+            
+            #print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                padding: 2cm; /* هوامش رسمية */
+                font-family: 'Simplified Arabic', serif;
+                color: black;
+            }
+
+            .header-table table { width: 100%; border: 1.5pt solid black; }
+            
+            /* منع قطع الفقرات بين الصفحات */
+            p { page-break-inside: avoid; }
+            
+            /* إضافة رقم الصفحة تلقائياً */
+            @page {
+                size: A4;
+                margin: 1cm;
+            }
+
+
+            #print-area::before {
+                content: "";
+                position: fixed;
+                top: 50%; left: 50%;
+                transform: translate(-50%, -50%) rotate(-45deg);
+                font-size: 100pt;
+                color: rgba(0,0,0,0.05); /* لون خفيف جداً */
+                content: "نسخة رسمية";
+                z-index: -1;
+            }
+        }
+
+    </style>
+@endsection
+
 @section('content')
 <div id="decision-stepper" class="h-screen bg-gray-100 flex flex-col rtl" dir="rtl">
     

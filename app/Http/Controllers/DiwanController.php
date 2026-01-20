@@ -17,7 +17,6 @@ class DiwanController extends Controller
 {
    public function show()
      {
-        $vcourts = VCourt::with('catigory')->get();
          return view('diwan');
     }
    public function getVCs() {
@@ -32,7 +31,8 @@ class DiwanController extends Controller
             'round_year' => 'integer|digits:4|min:1900|max:'.(date('Y') + 1),
             'c_date' => 'required|date|before_or_equal:today',
             'c_start_year' => 'required|integer|digits:4|min:1900|max:'.(date('Y') + 1),
-            'decision_number' => ['required','numeric','gt:0',new SequenceDecisions()],
+            'decision_number' => ['required','numeric','gt:0',new SequenceDecisions()
+            ],
             'decision_date' => 'required|date|before_or_equal:today',
             'urgencyType' => 'required|in:normal,urgent,other',
             'hurry_text' => 'required_if:urgencyType,urgent||nullable|string',  
@@ -62,10 +62,11 @@ class DiwanController extends Controller
             'round_year',
             'user_id',
          ]);
-         DB::transaction(function () use ($validated, $data) {
+         $cdf = null;
+         DB::transaction(function () use ($validated, $data , &$cdf) {
             $cfile=CFile::create($data);
             $cfile->refresh();
-            $this->pushDecsionDetoCopy($cfile, [
+            $cdf = $this->pushDecsionDetoCopy($cfile, [
                'decision_number'=>$validated['decision_number'],
                'decision_date'=>$validated['decision_date'],
                'hurry'=>$validated['urgencyType'] == 'urgent' ? 1 : 0 ,
@@ -73,7 +74,7 @@ class DiwanController extends Controller
                'hurry_date'=>$validated['hurry_date'],
             ]);
          });
-         broadcast(new NewDecision($data));
+         broadcast(new NewDecision($cdf));
          return response()->json(['message' => 'تم الحفظ بنجاح']);
    }
    private function pushDecsionDetoCopy($cfile,$descionD) {
@@ -96,6 +97,7 @@ class DiwanController extends Controller
          Redis::set($key, json_encode( $data));
 
          Redis::sadd("active_decisions_list", $key);
+         return $data;
    }
 
       // private function removeDecsionDetoCopy($cfile,$descionD) {

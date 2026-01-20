@@ -25,6 +25,8 @@
         <!-- pusher -->
         <script src="{{ asset('pusher.js') }}"></script>
 
+        @yield('head_content')
+
     </head>
     <body class="bg-slate-50 min-h-screen">
         @include('navbar') {{-- تضمين النافبار --}}

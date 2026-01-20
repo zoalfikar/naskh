@@ -38,7 +38,7 @@ class CopyController extends Controller
 
         $currentCDF = Redis::get("copier::".Auth::id()."::has");
         if ($currentCDF) {
-            $$raw = Redis::get($currentCDF);
+            $raw = Redis::get($currentCDF);
             if ($raw) {
                 $data['cfD'] = json_decode($raw, true);
                 // تأكد من تمرير المحكمة الصحيحة لجلب التابات والقضاة

@@ -36,11 +36,17 @@
 @section('content')
 
 <div id="decision-editor" v-cloak class="min-h-screen bg-gray-100 p-4 rtl" dir="rtl">
-    @{{ states ? states[1].courtCategories  : 'jkjkjkjk'}}
+    <div v-if="Object.keys(errors).length > 0" class="mb-4 p-4 bg-red-50 border-r-4 border-red-500 rounded-md">
+        <h4 class="text-red-800 font-bold mb-2">يوجد أخطاء في البيانات تمنع الحفظ:</h4>
+        <ul class="list-disc list-inside text-sm text-red-700">
+            <li v-for="(error, index) in errors" :key="index">
+                @{{ error[0] }} </li>
+        </ul>
+    </div>
     <div class="max-w-[1600px] mx-auto bg-white shadow-2xl rounded-xl overflow-hidden border border-gray-200">
         <div class="bg-slate-800 p-3 flex items-center justify-between">
             <div class="flex gap-4">
-                <button @click="saveDecision" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg font-bold transition flex items-center gap-2">
+                <button @click="saveDraft" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg font-bold transition flex items-center gap-2">
                     <i class="fas fa-save"></i> حفظ القرار (F10)
                 </button>
                 <button @click="printDecision" class="bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg transition">
@@ -90,7 +96,7 @@
                             <label class="block text-[11px] font-bold text-gray-600 mb-1">تاريخ القرار (ميلادي / هجري)</label>
                             <div class="flex gap-2">
                                 <input  :disabled=true v-model="dec.decision_date" type="date"  class="w-full border-gray-300 rounded-md text-sm">
-                                <input v-model="dec.higry_date" type="text" placeholder="هجري" class="w-1/2 border-gray-300 rounded-md text-sm bg-gray-50">
+                                <input v-model="dec.higry_date" type="text" placeholder= " هجري  " class="w-1/2 border-gray-300 rounded-md text-sm bg-white-50">
                             </div>
                         </div>
                     </div>
@@ -107,21 +113,31 @@
                             <label class="block text-[11px] font-bold text-gray-600 mb-1">اساس أول دعوى</label>
                             <input  type="number" v-model="cfile.c_begin_n"  class="w-full border-gray-300 rounded-md text-sm font-bold text-blue-800">
                         </div>
-                        <div class="col-span-2">
+                        <div class="col-span-1">
                             <label class="block text-[11px] font-bold text-gray-600 mb-1">تاريخ قيد الدعوى</label>
                             <div class="flex gap-2">
                                 <input :disabled=true v-model="cfile.c_date"  type="date"  class="w-full border-gray-300 rounded-md text-sm">
+                            </div>
+                        </div>
+                        <div class="col-span-1">
+                            <label class="block text-[11px] font-bold text-gray-600 mb-1"> لعام</label>
+                            <div class="flex gap-2">
+                                <input :disabled=true v-model="cfile.c_start_year"  type="number"  class="w-full border-gray-300 rounded-md text-sm">
                             </div>
                         </div>
                     </div>
                 </section>
 
 
-                <section class="bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
+                <section :class="{'ring-2 ring-red-500 animate-pulse shadow-lg': errors.judges}"
+                    class="bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
                     <h4 class="text-slate-700 font-bold mb-3 text-xs flex justify-between">
                         هيئة محكمة النقض
-                        <button @click="" class="text-blue-600 hover:underline">+ إضافة قاضي</button>
+                        <span v-if="errors.judges" class="text-red-600 text-[10px] animate-bounce">
+                            <i class="fas fa-arrow-down"></i> راجع بيانات الهيئة
+                        </span>
                         <button v-if="vjudges" @click="orderTd=!orderTd" class="text-blue-600 hover:underline">@{{!orderTd ? 'ترتيب' : 'حفظ' }}</button>
+                        {{-- <button @click="" class="text-blue-600 hover:underline">+ إضافة قاضي</button> --}}
                     </h4>
                     <table class="w-full text-xs">
                         <thead>
@@ -134,9 +150,9 @@
                         </thead>
                         <tbody>
                             <tr v-for="(judge, index) in vjudges" :key="judge.j_code">
-                                <td class="border border-gray-200">@{{ judge.person.name }}</td>
-                                <td class="border border-gray-200">
-                                     <select v-model="judge.j_desc" class="w-full border-gray-200 rounded p-1.5 text-xs bg-white shadow-sm">
+                                <td  class="p-2 border border-gray-200">@{{ judge.person.name }}</td>
+                                <td class="p-2 border border-gray-200">
+                                     <select v-model="judge.j_desc" class="w-full border-gray-200 rounded p-1.5 text-xs bg-white">
                                          <option value="رئيسا">رئيسا</option>
                                          <option  value="مستشارا">مستشارا</option>
                                     </select>
@@ -158,7 +174,7 @@
                                             v-model="judge.j_serperator" 
                                             :true-value="1" 
                                             :false-value="0"
-                                            @change="judge.j_serperator === 1 ? judge.j_oppsoit = 0 : null"
+                                            @change="handleSeparator(index)"
                                             class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
                                         <span class="text-[10px] font-bold" :class="judge.j_serperator ? 'text-blue-600' : 'text-gray-400'">فصل</span>
                                     </div>
@@ -420,6 +436,7 @@
                             number: null,
                             c_begin_n: null,
                             c_date: null,
+                            c_start_year:null,
                             degree1_number:null,
                             degree1_year:null,
                             degree1_dec_n:null,
@@ -441,6 +458,7 @@
                             decision_date: '',
                             higry_date:null
                         },
+                        errors: {},
                     }
                 },
                 computed: {
@@ -476,7 +494,23 @@
                         }
                         return 0;
                     },
+                cfd() {
+                        // التحقق من وجود البيانات الأساسية
+                        if (!this.cfile || !this.dec) {
+                            return null;
+                        }
 
+                        return {
+                            cfile: this.cfile,
+                            // توحيد المسمى مع الـ Controller (descionD)
+                            descionD: {
+                                ...this.dec,
+                                // ندمج القضاة والتبويبات المختارة ليتم حفظهم معاً
+                                vjudges: this.vjudges,
+                                selectedTabs: this.selectedTabs
+                            }
+                        };
+                    },
                 },
                 watch: {
                     // اسم الدالة هنا يجب أن يكون مطابقاً تماماً لاسم المتغير في data
@@ -556,6 +590,21 @@
                             judge.j_order = idx + 1;
                         });
                     },
+                    handleSeparator(currentIndex) {
+                        const currentJudge = this.vjudges[currentIndex];
+
+                        if (currentJudge.j_serperator === 1) {
+                            // 1. التأكد من إلغاء خيار "مخالف" لنفس القاضي (لأن القاضي لا يمكن أن يكون فاصلاً ومخالفاً معاً)
+                            currentJudge.j_oppsoit = 0;
+
+                            // 2. الحلقة الأهم: تصفير خيار "فصل" لجميع القضاة الآخرين
+                            this.vjudges.forEach((judge, index) => {
+                                if (index !== currentIndex) {
+                                    judge.j_serperator = 0;
+                                }
+                            });
+                        }
+                    },
                     async vcourtChoosed(vcourt) {
                         this.loading = true;
                         try {
@@ -621,10 +670,31 @@
                     //         alert('حدث خطأ أثناء الحفظ');
                     //     });
                     // },
-                    saveDraft() {
-                        // هنا نستخدم Axios لإرسال البيانات إلى Redis أو Database
-                        console.log("Saving data:", this.form);
-                        alert("تم حفظ مسودة القرار بنجاح");
+                    async saveDraft() {
+
+                        this.errors = {}; // تفريغ الأخطاء السابقة
+                        this.loading = true;
+                        try {
+                                   // هنا نستخدم Axios لإرسال البيانات إلى Redis أو Database
+                            const response = await axios.post('/copy/save/draft', this.cfd);
+                            console.log(response.data);
+                            alert(response.data.message);
+
+                        } catch (error) {
+                        
+                            if (error.response && error.response.status === 422) {
+                                // هنا السر: نقوم بجلب مصفوفة الأخطاء من استجابة السيرفر
+                                this.errors = error.response.data.errors;
+                                alert("تعذر حفظ بيانات القرار، يرجى المحاولة مرة أخرى.");
+                                console.log(error);
+                            }
+                            else {
+                                    alert("حدث خطأ غير متوقع في السيرفر");
+                                }
+                        }
+                        finally {
+                            this.loading = false;
+                        }
                     },
                     printDecision() {
                         // ترتيب التبويبات حسب 'order' قبل الطباعة
@@ -636,12 +706,15 @@
                         }, 500);
                     },
                     setCFDecRes(cfd){
+
+                        
                         this.dec.decision_number = cfd.descionD.decision_number;
                         this.dec.decision_date = cfd.descionD.decision_date;
                         if ( cfd.descionD.decision_type )  this.dec.decision_type = cfd.descionD.decision_type;
                         this.cfile.number = cfd.cfile.number;
                         this.cfile.c_begin_n = cfd.cfile.c_begin_n;
-                        this.cfile.c_date = cfd.cfile.c_date;
+                        this.cfile.c_date = cfd.cfile.c_date ? cfd.cfile.c_date.split(' ')[0] : '';
+                        this.cfile.c_start_year = cfd.cfile.c_start_year;
                         this.selectedVCourt = cfd.cfile.v_corte;
                     },
                     async fetchRelatedData() {
@@ -653,7 +726,9 @@
                             this.userCourtName = res.data.userCourtName || 'غير محدد';
 
                             this.states = res.data.states ;
-                            this.rooms = res.data.rooms ;
+                            this.rooms = res.data.rooms.sort((a, b) => {
+                                                            return a.code - b.code; // ترتيب تصاعدي حسب الكود
+                                                        }); 
                             this.courts = res.data.courts ;
                             this.decisionTypes = res.data.decisionTypes ;
 

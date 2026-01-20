@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreDecisionRequest;
 use App\Models\JVcourt;
 use App\Models\Room;
 use App\Models\State;
@@ -174,6 +175,27 @@ class CopyController extends Controller
         }
 
         return response()->json(['message' => 'تم تحرير القرار بنجاح']);
+    }
+
+    public function saveDraft(StoreDecisionRequest $request) {
+        $data = $request->validated();
+        $userId = Auth::id();
+
+        // بناء المفتاح الأصلي للقرار
+        $itemKey = "{$data['cfile']['code']}::copy::{$data['cfile']['v_corte']}::{$data['descionD']['decision_number']}::{$data['cfile']['c_start_year']}";
+
+
+        $data['descionD']['copied']=1;
+        // 1. تحديث بيانات القرار في Redis (حفظ المسودة)
+        Redis::set($itemKey, json_encode($data));
+
+        // 2. ضمان بقاء الرابط مع الناسخ الحالي
+        Redis::set("copier::{$userId}::has", $itemKey);
+
+        return response()->json([
+            'message' => 'تم حفظ المسودة بنجاح، وهي جاهزة للتدقيق',
+            'last_save' => now()->format('H:i:s')
+        ]);
     }
     
 }

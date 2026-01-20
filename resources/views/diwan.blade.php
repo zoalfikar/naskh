@@ -117,7 +117,7 @@
 
                         <div class="space-y-2">
                             <label class="block text-sm font-semibold text-gray-700">تاريخ قيد الدعوى</label>
-                            <input v-model="form.c_date" type="date" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#1a4d4d]">
+                            <input v-model="form.c_date" onfocus="(this.type='date')"  onblur="(this.type='text')" placeholder="سنة/شهر/يوم" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#1a4d4d]">
                             <span v-if="errors.c_date" class="error-text text-red-600 pr-2">
                                 @{{ errors.c_date[0] }}
                             </span>

@@ -127,6 +127,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/copy_p',  [CopyController::class, 'show'])->name('copy_p');
             Route::get('/get-data',  [CopyController::class, 'fetchCopierData'])->name('get-data');
             Route::get('/copy/vcourt/fetch',  [CopyController::class, 'copyVCFetchData'])->name('get-data-vcf');
+            Route::post('/copy/save/draft',  [CopyController::class, 'saveDraft'])->name('save-draft');
             
         });
 

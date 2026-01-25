@@ -32,7 +32,8 @@ class AuthController extends Controller
         return match($user->role) {
             0 => redirect()->intended('/diwan_p'),
             1  => redirect()->intended('/copy_p'),
-            default  => redirect()->intended('/dashboard'),
+            2  => redirect()->intended('/review_p'),
+            default  => redirect()->intended('/'),
         };
     }
 

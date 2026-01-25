@@ -70,33 +70,33 @@
                     <div>
                     <select v-model="selectedVCourt"  :disabled="selectedVCourt" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 text-sm">
                         <option v-for="(vc, index) in userVCourts" :key="index" :value="vc.vcourt">
-                                @{{ vc.vcourt_name }}
+                                @{{ vc.vcourt_name }} @{{ vc.vcourt }}
                         </option>                                
                     </select> 
                     </div>
                 </section> 
 
 
-                <section class="space-y-3">
+                <section class="space-y-3" v-if="descionD">
                     <h4 class="text-blue-900 font-black border-b border-blue-200 pb-2 text-sm uppercase">بيانات القرار الأساسية</h4>
                     <div class="grid grid-cols-2 gap-3">
                         <div class="col-span-1">
                             <label class="block text-[11px] font-bold text-gray-600 mb-1">نوع القرار</label>
-                            <select v-model="dec.decision_type" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 text-sm">
+                            <select v-model="descionD.decision_type" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 text-sm">
                                 <option v-for="(type, index) in decisionTypes" :key="type.code" :value="type.code">
                                         @{{ type.description }}
-                                </option>                                
+                                </option>
                             </select>
                         </div>
                         <div class="col-span-1">
                             <label  class="block text-[11px] font-bold text-gray-600 mb-1">رقم القرار</label>
-                            <input :disabled=true v-model="dec.decision_number" type="number"  class="w-full border-gray-300 rounded-md text-sm font-bold text-blue-800">
+                            <input :disabled=true v-model="descionD.decision_number" type="number"  class="w-full border-gray-300 rounded-md text-sm font-bold text-blue-800">
                         </div>
                         <div class="col-span-2">
                             <label class="block text-[11px] font-bold text-gray-600 mb-1">تاريخ القرار (ميلادي / هجري)</label>
                             <div class="flex gap-2">
-                                <input  :disabled=true v-model="dec.decision_date" type="date"  class="w-full border-gray-300 rounded-md text-sm">
-                                <input v-model="dec.higry_date" type="text" placeholder= " هجري  " class="w-1/2 border-gray-300 rounded-md text-sm bg-white-50">
+                                <input  :disabled=true v-model="descionD.decision_date" type="date"  class="w-full border-gray-300 rounded-md text-sm">
+                                <input v-model="descionD.higry_date" type="text" placeholder= " هجري  " class="w-1/2 border-gray-300 rounded-md text-sm bg-white-50">
                             </div>
                         </div>
                     </div>
@@ -144,8 +144,8 @@
                             <tr class="bg-slate-100">
                                 <th class="p-2 border border-gray-200 w-45">القاضي</th>
                                 <th class="p-2 border border-gray-200 w-25">الصفة</th>
-                                <th class="p-2 border border-gray-200 w-15">فصل</th>
                                 <th class="p-2 border border-gray-200 w-15">مخالف</th>
+                                <th class="p-2 border border-gray-200 w-15">فصل</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -416,7 +416,6 @@
                         selectedVCourt:null,
                         userVCourts: '',
                         orderTd:false,
-                        cfd:null,
                         loading: false,
                         chooseTabModal: false,
                         tabs: [],
@@ -431,8 +430,10 @@
                         selectedStateD1:null,
                         selectedStateD2:null,
                         decisionTypes: [],
-                        
+                        cfd:null,
                         cfile:{
+                            kind:null,
+                            subject:null,
                             number: null,
                             c_begin_n: null,
                             c_date: null,
@@ -452,8 +453,8 @@
                             degree2_state:null,
                             degree2_room:null,
                         },
-                        dec: {
-                            decision_type: 0,
+                        descionD: {
+                            decision_type: 1,
                             decision_number: '',
                             decision_date: '',
                             higry_date:null
@@ -463,14 +464,14 @@
                 },
                 computed: {
                     currentVCName() {
-                        if (this.selectedVCourt) {
-                            const court = this.userVCourts.find(C => C.vcourt == this.selectedVCourt);
-                            return court ? court.vcourt_name : null;
-                            
-                        } else {
-                            return null;
-                        }
-                                            },
+                            if (this.selectedVCourt) {
+                                const court = this.userVCourts.find(C => C.vcourt == this.selectedVCourt);
+                                return court ? court.vcourt_name : null;
+                                
+                            } else {
+                                return null;
+                            }
+                        },
                         current1courts() {
                             if (!this.courts.length) return [];
                             
@@ -494,20 +495,35 @@
                         }
                         return 0;
                     },
-                cfd() {
+                cfdReq() {
                         // التحقق من وجود البيانات الأساسية
-                        if (!this.cfile || !this.dec) {
+                        if (!this.cfile || !this.descionD || !this.cfd || !this.cfd.descionD) {
                             return null;
                         }
 
                         return {
-                            cfile: this.cfile,
+                            cfile: {
+                                ...this.cfile ,
+                                v_corte : this.cfd.cfile.v_corte,
+                                id : this.cfd.cfile.id,
+                                round_year:this.cfd.cfile.round_year,
+                                code:this.cfd.cfile.code,
+                            },
                             // توحيد المسمى مع الـ Controller (descionD)
                             descionD: {
-                                ...this.dec,
+                                ...this.descionD ,
+                                hurry : this.cfd.descionD.hurry,
+                                reviewed: this.cfd.descionD.reviewed,
+                                copied: this.cfd.descionD.copied,
+                                reserved: this.cfd.descionD.reserved,
+                                reservedFRev: this.cfd.descionD.reservedFRev,
+                                reservedUName: this.cfd.descionD.reservedUName,
+                                reservedU: this.cfd.descionD.reservedU,
+                                reservedFRevU: this.cfd.descionD.reservedFRevU,
+                                reservedFRevUName: this.cfd.descionD.reservedFRevUName,
                                 // ندمج القضاة والتبويبات المختارة ليتم حفظهم معاً
                                 vjudges: this.vjudges,
-                                selectedTabs: this.selectedTabs
+                                tabs: this.selectedTabs
                             }
                         };
                     },
@@ -523,16 +539,21 @@
 
                         }
                     },
-                    'dec.decision_type': function(newVal) {
+                    'descionD.decision_type':{
+                        handler(newVal) {
+                            console.log(newVal);
                             
-                            
-                            // تصفية التبويبات بناءً على المجموعة
-                            this.kindTabs = this.tabs.filter((t) => (t.group === parseInt(newVal) || t.group == 0)).sort((a, b) => (a.order ) - (b.order ));
-                            
-                            // نصيحة: إذا كنت تريد تفريغ الاختيار السابق عند تغيير النوع
-                            this.selectedTabs = []; 
-                            this.activeTab = null;
-        
+                                // تصفية التبويبات بناءً على المجموعة
+                                this.kindTabs = this.tabs.filter((t) => (t.group == parseInt(newVal) || t.group == 0)).sort((a, b) => (a.order ) - (b.order ));
+                                
+                                console.log(this.tabs);
+                                
+                                // نصيحة: إذا كنت تريد تفريغ الاختيار السابق عند تغيير النوع
+                                this.selectedTabs = []; 
+                                this.activeTab = null;
+            
+                        },
+                        immediate: true
                     }
                 },
                 
@@ -627,8 +648,11 @@
                             // إذا وجد قرارات يكمل الكود طبيعي
                             this.cfd = response.data.cfD;
                             this.tabs = response.data.tabs;
-                            this.kindTabs = this.tabs.filter((t) => t.group == this.dec.decision_type)
+                            this.setCFDecRes(this.cfd);
+                            this.kindTabs = this.tabs.filter((t) => t.group == this.descionD.decision_type)
                                                     .sort((a, b) => a.order - b.order);
+
+                            if (!this.vjudges || !(this.vjudges.length > 0)) 
                             this.vjudges = response.data.judges.map((judge, index) => {
                                     return {
                                         ...judge,
@@ -638,9 +662,8 @@
                                         j_oppsoit: '' 
                                     };
                             })
-                            this.setCFDecRes(this.cfd);
                             
-                            console.log("تم حجز القرار رقم: " + this.dec.decision_number);
+                            console.log("تم حجز القرار رقم: " + this.descionD.decision_number);
 
                         } catch (error) {
                             console.error("خطأ:", error);
@@ -676,7 +699,7 @@
                         this.loading = true;
                         try {
                                    // هنا نستخدم Axios لإرسال البيانات إلى Redis أو Database
-                            const response = await axios.post('/copy/save/draft', this.cfd);
+                            const response = await axios.post('/copy/save/draft', this.cfdReq);
                             console.log(response.data);
                             alert(response.data.message);
 
@@ -696,6 +719,15 @@
                             this.loading = false;
                         }
                     },
+                    async autoSaveDraft() {
+                        try {
+                            // نرسل الـ cfd الذي قمنا بتطويره والذي يجمع (cfile + dec + vjudges + tabs)
+                            await axios.post('/copy/save/temp-draft', this.cfdReq);
+
+                        } catch (error) {
+                            console.error("فشل الحفظ التلقائي، ربما انقطع الاتصال.");
+                        }
+                    },
                     printDecision() {
                         // ترتيب التبويبات حسب 'order' قبل الطباعة
                         this.selectedTabs.sort((a, b) => a.order - b.order);
@@ -706,16 +738,16 @@
                         }, 500);
                     },
                     setCFDecRes(cfd){
-
-                        
-                        this.dec.decision_number = cfd.descionD.decision_number;
-                        this.dec.decision_date = cfd.descionD.decision_date;
-                        if ( cfd.descionD.decision_type )  this.dec.decision_type = cfd.descionD.decision_type;
+                        this.descionD.decision_number = cfd.descionD.decision_number;
+                        this.descionD.decision_date = cfd.descionD.decision_date;
+                        if ( cfd.descionD.decision_type )  this.descionD.decision_type = cfd.descionD.decision_type;
                         this.cfile.number = cfd.cfile.number;
                         this.cfile.c_begin_n = cfd.cfile.c_begin_n;
                         this.cfile.c_date = cfd.cfile.c_date ? cfd.cfile.c_date.split(' ')[0] : '';
                         this.cfile.c_start_year = cfd.cfile.c_start_year;
                         this.selectedVCourt = cfd.cfile.v_corte;
+                        if ( cfd.descionD.vjudges )  this.vjudges = cfd.descionD.vjudges;
+                        if ( cfd.descionD.selectedTabs )  this.selectedTabs = cfd.descionD.selectedTabs;
                     },
                     async fetchRelatedData() {
                         this.loading = true; // ابدأ التحميل
@@ -737,7 +769,19 @@
                             if (res.data.cfD) {
                                 this.cfd = res.data.cfD
                                 this.setCFDecRes(this.cfd)
-                                this.vjudges = res.data.judges
+
+                                if (!this.vjudges || !(this.vjudges.length > 0)) 
+                                this.vjudges = res.data.judges.map((judge, index) => {
+                                    return {
+                                        ...judge,
+                                        j_serperator: '',
+                                        j_desc: 'مستشارا',
+                                        j_order: index + 1, // يبدأ من 1 بدلاً من 0 ليكون منطقياً للمستخدم
+                                        j_oppsoit: '' 
+                                    };
+                                })
+                                console.log(res.data.tabs);
+                                
                                 this.tabs = res.data.tabs
                                 
                             }
@@ -758,6 +802,13 @@
                     // إذا كان هناك بيانات سابقة قادمة من Redis، يتم تحميلها هنا
                     console.log("App Ready - Ready to complete decision data");
                     this.fetchRelatedData();
+
+
+                    setInterval(() => {
+                        if (this.cfd && this.selectedVCourt) {
+                            this.autoSaveDraft();
+                        }
+                    }, 15000); 
                 }
             }).mount('#decision-editor')
     </script>

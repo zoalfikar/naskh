@@ -4,10 +4,12 @@ use App\Events\NewDecision;
 use App\Http\Controllers\auth\AuthController;
 use App\Http\Controllers\CopyController;
 use App\Http\Controllers\DiwanController;
+use App\Http\Controllers\ReviewerController;
 use Illuminate\Support\Facades\Route;
 use App\Models\CFile;
 use App\Models\JVcourt;
 use App\Models\Tabs;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 
 Route::middleware('guest')->group(function () {
@@ -47,8 +49,9 @@ Route::get('/test',  function () {
 Route::get('/test1',  function () {
        
 
-    
+    $r= Redis::get("23::copy::52::54::2026");
     // return view('copier1');
+    return $r;
     
 });
 
@@ -87,6 +90,27 @@ Route::get('/test2',  function () {
 
 
 
+// Route::get('/test7',  function () {
+
+// // return $cases = DB::connection('oracle')->table('MOJ_NAKED.CFCOURT_AUDIT')->where('CFCOURTNO',1148 )->take(10)->get(); 
+
+
+
+// // return $cases = DB::connection('oracle')->table('MOJ_NAKED.CFCOURT_AUDIT')->where('CFCOURTNO',1148 )->where('BEGINCOURTYEAR',2025)->take(10)->get(); 
+//  $cases = DB::connection('oracle')->table('MOJ_NAKED.CFCOURT_AUDIT')->where('CFCOURTNO',1148 )->where('BEGINCOURTYEAR',2025)->where('COURTCODE',28 )->get(); 
+//  $d = DB::connection('oracle')->table('MOJ_NAKED.DECISION_AUDIT')->where('CFCOURTSEQ',$cases[0]->cfcourtseq )->get(); 
+//  $t = DB::connection('oracle')->table('MOJ_NAKED.DECISION_TABS_AUDIT')->where('CFCOURTSEQ',$cases[0]->cfcourtseq )->get(); 
+
+
+// //   $cases = DB::connection('oracle')->table('MOJ_NAKED.CFCOURT_AUDIT')->where('CFCOURTNO',424 )->where('COURTCODE',44)->get(); 
+// //  $d = DB::connection('oracle')->table('MOJ_NAKED.DECISION_AUDIT')->where('CFCOURTSEQ',$cases[0]->cfcourtseq )->get(); 
+// //  $t = DB::connection('oracle')->table('MOJ_NAKED.DECISION_TABS_AUDIT')->where('CFCOURTSEQ',$cases[0]->cfcourtseq )->get(); 
+// //  dd($cases);
+// dd([$cases->toArray() ,  $d->toArray() ,$t->toArray()]);
+
+
+// });
+
 Route::get('/test6',  function () {
 //         $data=[
 //             'v_corte'=>43,
@@ -106,7 +130,8 @@ Route::get('/test6',  function () {
 });
 // $cc = CFile::where('code',1)->get();
 
-    Route::get('/test5',  [CopyController::class, 'copyVCFetchData'])->name('get-data');
+    // Route::get('/test5',  [CopyController::class, 'copyVCFetchData'])->name('get-data');
+    // Route::get('/test9',  [ReviewerController::class, 'show']);
 
 
 Route::middleware('auth')->group(function () {
@@ -128,8 +153,20 @@ Route::middleware('auth')->group(function () {
             Route::get('/get-data',  [CopyController::class, 'fetchCopierData'])->name('get-data');
             Route::get('/copy/vcourt/fetch',  [CopyController::class, 'copyVCFetchData'])->name('get-data-vcf');
             Route::post('/copy/save/draft',  [CopyController::class, 'saveDraft'])->name('save-draft');
+            Route::post('/copy/save/temp-draft',  [CopyController::class, 'saveTempDraft']);
             
         });
+
+        Route::middleware('reviewer')->group(function () {
+
+            Route::get('/review_p', [ ReviewerController::class, 'show'])->name('review_p');
+            Route::get('/get-data-review',  [ReviewerController::class, 'fetchReviewerData']);
+            Route::get('/review/vcourt/fetch',  [ReviewerController::class, 'reviewVCFetchData']);
+            Route::post('/review/return/draft',  [ReviewerController::class, 'returnDecision']);
+            // Route::post('/copy/save/temp-draft',  [CopyController::class, 'saveTempDraft']);
+            
+        });
+
 
     // API routes for courts
     // Route::resource('courts', CourtController::class);

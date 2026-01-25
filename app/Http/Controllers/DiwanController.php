@@ -81,7 +81,6 @@ class DiwanController extends Controller
        
          $key = "{$cfile->code}::copy::{$cfile->v_corte}::{$descionD['decision_number']}::{$cfile->c_start_year}";
 
-         $descionD['hurry']= $descionD['hurry'];
          $descionD['reviewed']=0;
          $descionD['copied']=0;
          $descionD['reserved']=0;
@@ -89,14 +88,21 @@ class DiwanController extends Controller
          $descionD['reservedUName']=null;
          $descionD['reservedU']=null;
          $descionD['reservedFRevU']=0;
-         $descionD['reservedFRevUName']=0;
+         $descionD['reservedFRevUName']=null;
+         $descionD['returned']=0;
+         $descionD['returnedNote']=0;
 
          $data=['cfile'=>$cfile,'descionD'=>$descionD];
                 
-         // تخزين البيانات بدون وقت انتهاء (Persistent)
-         Redis::set($key, json_encode( $data));
+         Redis::transaction( function () use ($data , $key ) {
 
-         Redis::sadd("active_decisions_list", $key);
+            Redis::set($key, json_encode( $data));
+
+            Redis::sadd("active_decisions_list", $key);
+
+         });
+         // تخزين البيانات بدون وقت انتهاء (Persistent)
+
          return $data;
    }
 
@@ -108,13 +114,20 @@ class DiwanController extends Controller
       // }
 
       private function removeDecsionDetoCopy($cfile, $descionD) {
-         $key = "{$cfile->code}::copy::{$cfile->v_corte}::{$descionD['decision_number']}::{$cfile->c_start_year}";
+         // $key = "{$cfile->code}::copy::{$cfile->v_corte}::{$descionD['decision_number']}::{$cfile->c_start_year}";
 
-         // حذف البيانات
-         Redis::del($key);
          
-         // حذف المفتاح من الفهرس (Set)
-         Redis::srem("active_decisions_list", $key);
+
+
+         // Redis::transaction( function () use ( $key ) {
+         //    // حذف البيانات
+         //    Redis::del($key);
+            
+         //    // حذف المفتاح من الفهرس (Set)
+         //    Redis::srem("active_decisions_list", $key);
+
+         // });
+
       }
 
 

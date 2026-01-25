@@ -23,5 +23,8 @@ class UserO extends Seeder
         DB::table('users')->where('id', 324)->update([
             'password' => bcrypt('1111'),
         ]);
+        DB::table('users')->where('id', 332)->update([
+            'password' => bcrypt('1111'),
+        ]);
     }
 }

@@ -35,7 +35,7 @@
                             <select v-else  v-model="form.v_corte" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#1a4d4d] bg-gray-50 pl-4 appearance-none cursor-pointer">
                                 <option value="">-- اختر المحكمة من القائمة --</option>
                                 <option v-for="court in courts" :key="court.code" :value="court.code">
-                                    @{{ court.catigory.name }}  - @{{ court.name }}
+                                    @{{ court.catigory.name }}  - @{{ court.name }} @{{ court.code }}
                                 </option>
                             </select>
                             <span v-if="errors.v_corte" class="error-text text-red-600 pr-2">
@@ -59,11 +59,11 @@
                         </div>
 
                         
-                        <div class="space-y-2" v-if="urgencyType === 'urgent'">
+                        <div class="space-y-2" v-if="form.urgencyType === 'urgent'">
                             <label class="block text-sm font-semibold text-gray-700">رقم كتاب الاستعجال</label>
                             <input  type="text" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#1a4d4d] placeholder-gray-400">
                         </div>
-                        <div class="space-y-2" v-if="urgencyType === 'urgent'">
+                        <div class="space-y-2" v-if="form.urgencyType === 'urgent'">
                             <label class="block text-sm font-semibold text-gray-700">تاريخ كتاب الاستعجال</label>
                             <input  type="date" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#1a4d4d]">
                         </div>

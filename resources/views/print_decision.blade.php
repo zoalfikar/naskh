@@ -1,4 +1,4 @@
-<div id="print-section" class="hidden print:block rtl" dir="rtl">
+<div id="print-section" class="hidden print:block rtl" dir="rtl" v-if="descionD">
     <div class="border-2 border-black p-2 mb-4">
         <div class="grid grid-cols-3 text-center border-b border-black pb-2 mb-2">
             <div class="text-sm">الصحيفة: @{{ pageNumber || 1 }}</div>
@@ -7,8 +7,8 @@
         </div>
         <div class="grid grid-cols-3 text-center font-bold">
             <div>رقم الأساس: @{{ cfile.number }}</div>
-            <div>رقم القرار: @{{ dec.decision_number }}</div>
-            <div>تاريخ القرار: @{{ dec.decision_date }}</div>
+            <div>رقم القرار: @{{ descionD && descionD.decision_number ? descionD.decision_number : '' }}</div>
+            <div>تاريخ القرار: @{{ descionD && descionD.decision_date ? descionD.decision_date : '' }}</div>
         </div>
     </div>
 

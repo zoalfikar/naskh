@@ -16,13 +16,14 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'diwan' => \App\Http\Middleware\Diwan::class,
             'copier' => \App\Http\Middleware\Copier::class,
+            'reviewer' => \App\Http\Middleware\Review::class,
         ]);
         $middleware->redirectGuestsTo('/');
 
         $middleware->redirectUsersTo(fn () => match (Auth::user()->role) {
             0       => '/diwan_p',
             1       => '/copy_p',
-            // 2       => '/author',
+            2       => '/review_p',
             // default => '/dashboard',
         });
     })

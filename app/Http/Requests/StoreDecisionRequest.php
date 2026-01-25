@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redis;
 
 class StoreDecisionRequest extends FormRequest
@@ -26,12 +27,18 @@ class StoreDecisionRequest extends FormRequest
             'cfile.code' => 'required',
             'descionD.decision_number' => 'required|numeric',
             'descionD.vjudges' => 'required|array|min:3', // الحد الأدنى لهيئة النقض
+            'descionD.tabs' => 'required|array|min:1', // الحد الأدنى لهيئة النقض
         ];
     }
 
 
     public function messages(): array{
         return [
+            'descionD.vjudges.required'=> 'يرجى اختيار القضاة.',
+            'descionD.vjudges.min'=> 'عدد أعداد الهيئة يجب ان يكون ثلاثه على الاقل',
+            'descionD.tabs.min'=> 'يجب ان يضمن القرار بند واحد على الاقل',
+            'descionD.tabs.required'=> 'يجب تضمين بنود القرار',
+
         ] ;
     }
 
@@ -40,10 +47,13 @@ class StoreDecisionRequest extends FormRequest
         $validator->after(function ($validator) {
             $data = $this->all();
             $judges = $data['descionD']['vjudges'] ?? [];
+            $userId = Auth::id();
 
             // 1. التحقق من عدم التلاعب بالبيانات (Redis Check)
             $originalKey = "{$data['cfile']['code']}::copy::{$data['cfile']['v_corte']}::{$data['descionD']['decision_number']}::{$data['cfile']['c_start_year']}";
-            if (!Redis::exists($originalKey)) {
+            $belongToUserKey = Redis::get("copier::{$userId}::has") === $originalKey ;
+
+            if (!Redis::exists($originalKey) || !$belongToUserKey) {
                 $validator->errors()->add('integrity', 'خطأ في نزاهة البيانات: الملف غير موجود في سجلات الديوان النشطة.');
             }
 

@@ -65,7 +65,7 @@
                     </div>
                     
                     <div class="flex gap-3">
-                        <input v-model="descionD.reviewer_note" type="text" 
+                        <input v-model="descionD.returnedNote" type="text" 
                             placeholder="اكتب ملاحظة للناسخ في حال الرفض..." 
                             class="bg-slate-700 border-none rounded px-4 py-2 text-sm w-80 focus:ring-2 focus:ring-yellow-500">
                         
@@ -111,7 +111,7 @@
 
                     <div class="mt-12 pt-8 border-t border-dashed border-gray-300">
                         <div class="grid grid-cols-3 gap-4 text-center">
-                            <div v-for="judge in vjudges" :key="judge.id" class="flex flex-col">
+                            <div v-for="judge in selectedJudges" :key="judge.id" class="flex flex-col">
                                 <span class="font-bold">@{{ judge.j_desc }}</span>
                                 <span>القاضي @{{ judge.name }}</span>
                                 <span v-if="judge.j_oppsoit == 1" class="text-red-600 font-bold text-xs">(مخالف)</span>
@@ -136,6 +136,7 @@
                         selectedVCourt:null,
                         userVCourts:'' ,
                         vjudges:[],
+                        selectedJudges:[],
                         tabs:[],
                         cfile:{
                             kind:null,
@@ -195,15 +196,17 @@
                     async rejectBackToCopier() {
                         this.loading = true;
                         try {
-                            const response = await axios.post('/review/return/draft', {  { "cfile": this.cfile , "descionD" : this.descionD } });
-                            alert(message);
+                            const response = await axios.post('/review/return/draft',  { "cfile": this.cfile , "descionD" : this.descionD } );
+                            alert(response.data.message);
 
-                            alert("عذراً، لا توجد قرارات في هذه المحكمة حالياً.");
                             
                             // بدلاً من location.reload() نقوم بتصفير الاختيار يدوياً
                             this.selectedVCourt = null; 
                             this.vjudges = [];
                             this.tabs = [];
+                            this.cfile = null;
+                            this.descionD = null;
+                            this.selectedJudges =null;
                         } 
                         catch (error) {
                             console.error("خطأ:", error);
@@ -236,6 +239,7 @@
                             this.tabs = response.data.cfD.descionD.tabs;
                             if (!this.vjudges || !(this.vjudges.length > 0)) 
                             this.vjudges = response.data.cfD.descionD.vjudges;
+                            this.selectedJudges = response.data.cfD.descionD.selectedJudges;
                             
                             console.log("تم حجز القرار رقم: " + this.descionD.decision_number);
 
@@ -269,6 +273,7 @@
                                 this.tabs = res.data.cfD.descionD.tabs;
                                 if (!this.vjudges || !(this.vjudges.length > 0)) 
                                 this.vjudges = res.data.cfD.descionD.vjudges;
+                                this.selectedJudges = res.data.cfD.descionD.selectedJudges;
                                 
                             }
 

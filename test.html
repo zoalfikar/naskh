@@ -1,0 +1,56 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Scheherazade+New&display=swap" rel="stylesheet">
+
+<style>
+/* @import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Scheherazade+New&display=swap'); */
+
+  body {
+    font-family: 'Amiri', serif;
+    direction: rtl;
+  unicode-bidi: isolate;
+  font-variant-numeric: arabic-indic;
+  }
+
+
+.decision {
+  font-family:  serif;
+  font-size: 18px;
+  line-height: 2;
+    unicode-bidi: isolate;
+  font-variant-numeric: arabic-indic;
+  font-feature-settings: "numr" 0, "lnum" 0, "tnum" 0, "ss01" 1;
+}
+
+.s {
+  font-family: "Traditional Arabic", "Amiri", serif;
+    unicode-bidi: isolate;
+  font-variant-numeric: arabic-indic;
+}
+</style>
+
+</head>
+<body>
+    <h1>تجربة لخط الاميري  23232123</h1>
+    
+  <h1 class="decision">
+  نص القرار القضائي سيريف 232323
+  </h1>
+
+   <h1 class="s">
+التقليدي ربما هذا هو  232323232 </h1>
+
+<script>
+    function toArabicDigits(str) {
+  return str.replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+
+}
+document.body.innerText = toArabicDigits(document.body.innerText);
+</script>
+</body>
+</html>

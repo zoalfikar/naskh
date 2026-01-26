@@ -1,4 +1,4 @@
-        <nav class="bg-[#0f2e2e] text-white shadow-xl p-4 mb-8">
+        <nav  class="bg-[#0f2e2e] text-white shadow-xl p-4 mb-8">
             <div class="container mx-auto flex justify-between items-center">
                 <div class="flex items-center gap-4">
                     <img src="{{ asset('images/logo.png') }}" alt="الشعار" class="h-14 brightness-110">

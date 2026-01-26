@@ -124,8 +124,8 @@ class ReviewerController extends Controller
         $itemKey = $cfD['temp_key'];
 
         // --- الخطوة الأهم: وسم القرار كمحجوز فوراً في Redis ---
-        $cfD['descionD']['reservedFRevU'] = 1;
-        $cfD['descionD']['reservedU'] = Auth::user()->id;
+        $cfD['descionD']['reservedFRev'] = 1;
+        $cfD['descionD']['reservedFRevU'] = Auth::user()->id;
         $cfD['descionD']['reservedFRevUName'] = Auth::user()->name;
         
         // إزالة المفتاح المؤقت قبل الحفظ
@@ -169,23 +169,28 @@ class ReviewerController extends Controller
     public function returnDecision(Request $request) {
         $data = $request->all();
         $userId = Auth::user()->id;
-        $note = $data['descionD']['returnedNote'];
+
+        // dd($data['descionD']["returnedNote"]);
+        $note = $data['descionD']["returnedNote"];
 
         // بناء المفتاح الأصلي للقرار
         $itemKey = "{$data['cfile']['code']}::copy::{$data['cfile']['v_corte']}::{$data['descionD']['decision_number']}::{$data['cfile']['c_start_year']}";
 
-        $data = Redis::get($itemKey);
-
-
-
+        $raw = Redis::get($itemKey);
+        $data=[];
+        $data=json_decode($raw, true);
+        
         $data['descionD']['returned']=1;
-
+        $data['descionD']['reservedFRevU']=null;
+        $data['descionD']['reservedFRevUName']=null;
+        
         $data['descionD']['returnedNote']= $note;
+
 
         Redis::transaction(function () use ($data, $userId, $itemKey) {
             // 1. تحديث بيانات القرار في Redis (حفظ المسودة)
-            Redis::sadd("returned_decisions_list", $itemKey);
             Redis::set($itemKey, json_encode($data));
+            Redis::sadd("returned_decisions_list", $itemKey);
             Redis::del("reviewer::".$userId."::has");
         });
 

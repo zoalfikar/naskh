@@ -32,7 +32,7 @@ class NewDecision implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new Channel('copy-'.$this->data['cfile']->v_corte),
+            // new Channel('copy-'.$this->data['cfile']->v_corte),
             new Channel('desicions'),
         ];
     }

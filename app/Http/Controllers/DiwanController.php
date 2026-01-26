@@ -87,10 +87,10 @@ class DiwanController extends Controller
          $descionD['reservedFRev']=0;
          $descionD['reservedUName']=null;
          $descionD['reservedU']=null;
-         $descionD['reservedFRevU']=0;
+         $descionD['reservedFRevU']=null;
          $descionD['reservedFRevUName']=null;
          $descionD['returned']=0;
-         $descionD['returnedNote']=0;
+         $descionD['returnedNote']=null;
 
          $data=['cfile'=>$cfile,'descionD'=>$descionD];
                 

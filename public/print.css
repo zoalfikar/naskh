@@ -1,0 +1,93 @@
+/* 1. استيراد الخطوط الرسمية */
+@import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&display=swap');
+
+@media print {
+    /* 2. تصفير شامل للمتصفح لمنع الهوامش العشوائية */
+    html, body {
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important; /* السماح للمحتوى بالظهور بدون قص */
+        background: white !important;
+    }
+
+    /* 3. إعدادات الصفحة الورقية A4 */
+    @page {
+        size: A4;
+        margin: 1.5cm 1.5cm 1cm 1.5cm; /* هوامش متوازنة */
+    }
+
+    /* 4. إخفاء العناصر التي لا علاقة لها بالقرار */
+    body * {
+        visibility: hidden !important;
+    }
+
+    nav, 
+    .navbar, 
+    footer, 
+    button, 
+    .no-print, 
+    p.text-center, 
+    #decision-editor > div:not(#print-section) {
+        display: none !important;
+        height: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* 5. إصلاح "الجاني" (العنصر الذي كشفته) */
+    /* نلغي الـ Grid والارتفاع المحسوب لضمان عدم فيضان الصفحة */
+    .grid.grid-cols-12, 
+    #main-grid-container,
+    div[class*="h-[calc(100vh-30px)]"] {
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        display: block !important; /* تحويله لـ Block يحل مشاكل الطباعة */
+        visibility: visible !important;
+    }
+
+    /* 6. إظهار قسم الطباعة فقط */
+    #print-section, 
+    #print-section * {
+        visibility: visible !important;
+    }
+
+    #print-section {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        display: block !important;
+        background: white !important;
+        page-break-after: avoid !important; /* منع فتح صفحة جديدة بعده */
+    }
+
+    /* 7. تحسينات النصوص والفقرات */
+    .font-serif-legal {
+        font-family: 'Amiri', serif !important;
+    }
+
+    /* منع تقطيع الفقرة الواحدة بين صفحتين إذا كان النص طويلاً */
+    .tab-content-block {
+        page-break-inside: avoid;
+        margin-bottom: 15px;
+    }
+    .tab-content-block {
+        page-break-inside: avoid; /* يمنع كسر الفقرة الواحدة بين صفحتين */
+        margin-bottom: 1.5rem;
+    }
+
+
+    #print-section {
+        position: relative !important;
+        height: 27cm !important; /* طول ورقة A4 تقريباً مع مراعاة الهوامش */
+    }
+
+    /* ضمان ظهور الخطوط العريضة للتواقيع */
+    .border-t-2 {
+        border-top-width: 2px !important;
+        border-color: black !important;
+    }
+}

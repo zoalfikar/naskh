@@ -1,0 +1,32 @@
+       @import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&display=swap');
+       /* @import url('https://fonts.googleapis.com/css2?family=Scheherazade+New&display=swap'); */
+
+        /* إعدادات الطباعة القوية */
+        @media print {
+            /* إخفاء كل شيء بشكل قطعي ما عدا قسم الطباعة */
+            body * {
+                visibility: hidden !important;
+
+            }
+            #print-section, #print-section * {
+                visibility: visible !important;
+            }
+            #print-section {
+                font-family:  "Amiri", serif;
+                    direction: rtl;
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                display: block !important;
+                background: white !important;
+            }
+            /* إخفاء الـ Navbar والـ Editor */
+            nav, .bg-[#0f2e2e], #decision-editor, button {
+                display: none !important;
+            }
+            @page {
+                size: A4;
+                margin: 1.5cm;
+            }
+        }

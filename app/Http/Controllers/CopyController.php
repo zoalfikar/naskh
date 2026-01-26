@@ -13,6 +13,7 @@ use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Auth as FacadesAuth;
 use Illuminate\Support\Facades\Redis;
 
 class CopyController extends Controller
@@ -113,22 +114,27 @@ class CopyController extends Controller
         $cfilesDs = [];
         // $keys = Redis::keys("*::copy::".$vcourt."::*");
         // $prefix = config('database.redis.options.prefix');
-        $allKeys = Redis::smembers("active_decisions_list");
-        foreach ($allKeys as $key) {
-            // $raw = Redis::get(str_replace($prefix, '', $key));
-            if (!str_contains($key, "::copy::{$vcourt}::")) continue;
-            $raw = Redis::get($key);
-            if ($raw) {
-                $item = json_decode($raw, true);
-                // التأكد أن القرار غير محجوز (reserved)
-                if ($item && (!isset($item['descionD']['reserved']) || !$item['descionD']['reserved'])) {
-                    $item['temp_key'] = $key; // حفظ المفتاح للتعامل معه لاحقاً
-                    $cfilesDs[] = $item;
+
+        $cfilesDs = $this->checkReturnedDecisiion( $vcourt);
+        if (!$cfilesDs) {
+            $allKeys = Redis::smembers("active_decisions_list");
+            foreach ($allKeys as $key) {
+                // $raw = Redis::get(str_replace($prefix, '', $key));
+                if (!str_contains($key, "::copy::{$vcourt}::")) continue;
+                $raw = Redis::get($key);
+                if ($raw) {
+                    $item = json_decode($raw, true);
+                    // التأكد أن القرار غير محجوز (reserved)
+                    if ($item && (!isset($item['descionD']['reserved']) || !$item['descionD']['reserved'])) {
+                        $item['temp_key'] = $key; // حفظ المفتاح للتعامل معه لاحقاً
+                        $cfilesDs[] = $item;
+                    }
                 }
             }
+            if (empty($cfilesDs)) return null;
         }
+        
 
-        if (empty($cfilesDs)) return null;
 
         // الترتيب بناءً على رقم القرار
         usort($cfilesDs, function($a, $b) {
@@ -161,7 +167,7 @@ class CopyController extends Controller
             // 4. الحفظ في Redis وربط اليوزر
             Redis::set($itemKey, json_encode($cfD));
             Redis::set("copier::".Auth::id()."::has", $itemKey);
-
+            Redis::srem("returned_decisions_list", $itemKey);
         });
 
         return $cfD;
@@ -231,7 +237,6 @@ class CopyController extends Controller
             ]);
         }
 
-
         Redis::transaction(function () use ($data, $userId, $itemKey) {
             // 1. تحديث بيانات القرار في Redis (حفظ المسودة)
             Redis::set($itemKey, json_encode($data));
@@ -246,5 +251,24 @@ class CopyController extends Controller
         ]);
     }
 
-    
+    protected function checkReturnedDecisiion($vcourt) {
+        $allKeys = Redis::smembers("returned_decisions_list");
+
+        foreach ($allKeys as $key) {
+            if (!str_contains($key, "::copy::{$vcourt}::")) continue;
+            $raw = Redis::get($key);
+            if ($raw) {
+                $item = json_decode($raw, true);
+                // التأكد أن القرار غير محجوز (reserved)
+                if ($item && (isset($item['descionD']['reserved']) && ($item['descionD']['reservedU'] == Auth::id()))) {
+                    $item['temp_key'] = $key; // حفظ المفتاح للتعامل معه لاحقاً
+                    $cfilesDs[] = $item;
+                }
+            }
+        }
+        if (empty($cfilesDs)) return null;
+
+        return $cfilesDs;
+
+    }
 }

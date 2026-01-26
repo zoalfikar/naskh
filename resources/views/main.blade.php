@@ -8,9 +8,9 @@
         <title>@yield('title')</title>
         <link rel="icon" type="image/png" href="{{ asset('images/OIP.jfif') }}">
 
-        <!-- Fonts -->
+        {{-- <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet"> --}}
 
         <!-- Tailwind CSS -->
         <script src="{{ asset('tailwind.js') }}"></script>
@@ -29,13 +29,13 @@
 
     </head>
     <body class="bg-slate-50 min-h-screen">
-        @include('navbar') {{-- تضمين النافبار --}}
+        {{-- @include('navbar')  --}}
 
         @yield('content')
 
-        <p class="text-center mt-6 text-gray-400 text-sm">
+        {{-- <p class="text-center mt-1 text-gray-400 text-sm">
             نظام التحول الرقمي السيادي &copy; 2026
-        </p>
+        </p> --}}
         <script>
 
 
